@@ -758,21 +758,50 @@ $('controlSearch').addEventListener('input',applySearch);
 
 // ---------- preview: fit, zoom & pan ----------
 const stage=$('stage'),vp=$('viewport'),view={z:1,x:0,y:0};let fitScale=1,baseLeft=0,baseTop=0;
-function fit(){
+let layoutToken=0,layoutCW=0;
+function layoutTarget(){
   const W=stage.clientWidth,H=stage.clientHeight;
   const cover=window.rigStageMode==='cover';
-  fitScale=Math.max(1e-3,cover?Math.max(W/CW,H/CH):Math.min(W/CW,H/CH));
-  const w=CW*fitScale,h=CH*fitScale;
-  baseLeft=(W-w)/2;
+  const scale=Math.max(1e-3,cover?Math.max(W/CW,H/CH):Math.min(W/CW,H/CH));
+  const w=CW*scale,h=CH*scale;
+  const left=(W-w)/2;
+  let top;
   if(window.rigStageAnchor==='face'){
     const faceY=0.29*h;
-    baseTop=Math.min(0,Math.max(H-h,H*0.40-faceY));
+    top=Math.min(0,Math.max(H-h,H*0.40-faceY));
   }else if(window.rigStageAnchor==='below-hinge'){
     // Eyes sit just under a horizontal hinge; hair can occupy the upper half.
-    const faceY=0.29*h;
-    baseTop=H*0.60-faceY;
-  }else baseTop=(H-h)/2;
-  vp.style.width=w+'px';vp.style.height=h+'px';applyView();
+    top=H*0.60-0.29*h;
+  }else top=(H-h)/2;
+  return {left,top,scale,w,h};
+}
+function writeLayout(L){
+  fitScale=L.scale;baseLeft=L.left;baseTop=L.top;
+  vp.style.width=L.w+'px';vp.style.height=L.h+'px';applyView();
+}
+function fit(){
+  const target=layoutTarget();
+  // First placement, and a new canvas size, appear immediately. Fold and unfold glide.
+  if(!layoutCW||layoutCW!==CW){layoutCW=CW;layoutToken++;writeLayout(target);return;}
+  const from={left:baseLeft,top:baseTop,scale:fitScale,w:CW*fitScale,h:CH*fitScale};
+  if(Math.abs(from.top-target.top)<0.5&&Math.abs(from.left-target.left)<0.5&&Math.abs(from.scale-target.scale)<1e-4){
+    writeLayout(target);return;
+  }
+  const token=++layoutToken,t0=performance.now();
+  const step=now=>{
+    if(token!==layoutToken)return;
+    const t=Math.min(1,(now-t0)/560);
+    const e=t*t*(3-2*t);
+    writeLayout({
+      left:from.left+(target.left-from.left)*e,
+      top:from.top+(target.top-from.top)*e,
+      scale:from.scale+(target.scale-from.scale)*e,
+      w:from.w+(target.w-from.w)*e,
+      h:from.h+(target.h-from.h)*e
+    });
+    if(t<1)requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 }
 window.rigRefit=fit;
 function applyView(){
