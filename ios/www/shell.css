@@ -54,8 +54,7 @@ body.screensaver #drop {
 }
 
 body.screensaver #camPreview {
-  top: calc(12px + env(safe-area-inset-top));
-  right: 12px;
+  display: none !important;
 }
 
 #saverDock {
@@ -91,4 +90,119 @@ body.screensaver #camPreview {
   background: #502134;
   border-color: #c42c50;
   color: #ffa1b7;
+}
+
+/* iPhone Duo: the inner display is one window with a hinge through the middle.
+   The face stays on one side of that crease. The other side is the camera. */
+body.screensaver {
+  --duo-gap: 28px;
+}
+
+#duoSeam,
+#duoCompanion {
+  display: none;
+}
+
+#duoSeam {
+  position: fixed;
+  z-index: 30;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.72) 42%, rgba(0, 0, 0, 0.72) 58%, transparent);
+}
+
+#duoCompanion {
+  position: fixed;
+  z-index: 12;
+  background: #101014;
+}
+
+#duoHint {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  top: 42%;
+  margin: 0;
+  text-align: center;
+  color: #b7b0c0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+body.screensaver.cam-on #duoHint {
+  display: none;
+}
+
+body.screensaver.duo-book #duoSeam,
+body.screensaver.duo-tent #duoSeam,
+body.screensaver.duo-book #duoCompanion,
+body.screensaver.duo-tent #duoCompanion {
+  display: block;
+}
+
+body.screensaver.duo-book #stage {
+  width: auto !important;
+  height: auto !important;
+  left: 0 !important;
+  right: calc(50% + var(--duo-gap) / 2) !important;
+  top: 0 !important;
+  bottom: 0 !important;
+}
+
+body.screensaver.duo-book #duoSeam {
+  top: 0;
+  bottom: 0;
+  left: calc(50% - var(--duo-gap) / 2);
+  width: var(--duo-gap);
+}
+
+body.screensaver.duo-book #duoCompanion {
+  top: 0;
+  bottom: 0;
+  left: calc(50% + var(--duo-gap) / 2);
+  right: 0;
+}
+
+body.screensaver.duo-tent #stage {
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+body.screensaver.duo-tent #duoSeam,
+body.screensaver.duo-tent #duoCompanion {
+  display: none !important;
+}
+
+body.screensaver.duo-book #saverDock {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+}
+
+body.screensaver.duo-book #appStatus {
+  left: 16px;
+  right: 16px;
+  bottom: calc(148px + env(safe-area-inset-bottom));
+}
+
+body.screensaver.duo-book.show-panel #panel {
+  left: calc(50% + var(--duo-gap) / 2) !important;
+  right: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: auto !important;
+  max-height: none !important;
+  border-top: 0 !important;
+  border-left: 1px solid #303039 !important;
+}
+
+body.screensaver.duo-tent.show-panel #panel {
+  left: auto !important;
+  right: 0 !important;
+  top: 0 !important;
+  bottom: auto !important;
+  width: min(420px, 46vw) !important;
+  max-height: 70% !important;
 }

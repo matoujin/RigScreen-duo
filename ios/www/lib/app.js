@@ -9,7 +9,11 @@
 const APP_VERSION='2.0.0';
 const RT=window.RigRuntime, FF=window.FaceFeatures;
 const QUERY=new URLSearchParams(location.search);
-const OBS_MODE=QUERY.get('obs')==='1', CAMERA_MODE=QUERY.get('cam')==='1';
+const OBS_MODE=QUERY.get('obs')==='1', CAMERA_MODE=QUERY.get('cam')==='1', SAVER=QUERY.get('app')==='1';
+// Screensaver wants a readable head: the stock rig turns about four degrees at full roll.
+const HEAD=SAVER
+  ? {roll:0.20, yaw:24, yawDepth:52, pitch:16, pitchDepth:36, body:0.22, bodyRot:0.05}
+  : {roll:0.07, yaw:14, yawDepth:40, pitch:9, pitchDepth:30, body:0.16, bodyRot:0.028};
 if(OBS_MODE)document.body.classList.add('obs');
 const $=id=>document.getElementById(id);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -756,10 +760,21 @@ $('controlSearch').addEventListener('input',applySearch);
 const stage=$('stage'),vp=$('viewport'),view={z:1,x:0,y:0};let fitScale=1,baseLeft=0,baseTop=0;
 function fit(){
   const W=stage.clientWidth,H=stage.clientHeight;
-  fitScale=Math.max(1e-3,Math.min(W/CW,H/CH));
-  const w=CW*fitScale,h=CH*fitScale;baseLeft=(W-w)/2;baseTop=(H-h)/2;
+  const cover=window.rigStageMode==='cover';
+  fitScale=Math.max(1e-3,cover?Math.max(W/CW,H/CH):Math.min(W/CW,H/CH));
+  const w=CW*fitScale,h=CH*fitScale;
+  baseLeft=(W-w)/2;
+  if(window.rigStageAnchor==='face'){
+    const faceY=0.29*h;
+    baseTop=Math.min(0,Math.max(H-h,H*0.40-faceY));
+  }else if(window.rigStageAnchor==='below-hinge'){
+    // Eyes sit just under a horizontal hinge; hair can occupy the upper half.
+    const faceY=0.29*h;
+    baseTop=H*0.60-faceY;
+  }else baseTop=(H-h)/2;
   vp.style.width=w+'px';vp.style.height=h+'px';applyView();
 }
+window.rigRefit=fit;
 function applyView(){
   vp.style.transform='translate('+(baseLeft+view.x)+'px,'+(baseTop+view.y)+'px) scale('+view.z+')';
   const isFit=view.z===1&&!view.x&&!view.y;
@@ -1065,7 +1080,7 @@ function renderObsStatus(st){
 
 // ---------- animation ----------
 let blinkT=-1,blinkVariant=1,blinkBounceStarted=false,irisBounceT=-1,nextBlink=performance.now()+1800;
-const rnd={ax:0,ay:0,az:0,bd:0,ex:0,ey:0};let nextRnd=0;
+const rnd={ax:0,ay:0,az:0,bd:0,ex:0,ey:0};let nextRnd=0,duoFlick=0,duoAnglePrev=null;
 let talkOn=false,talkV=0,talkTgt=0,nextTalkState=0,nextSyl=0;
 
 function fadeAlpha(L,e,alt){
@@ -1084,8 +1099,8 @@ const FRONTISH={'front hair':1,'side hair':1,'ahoge':1};
 function deform(L,e){
   const b=L.base,o=L.cur,n=b.length;
   const isHead=L.group==='head';
-  const az=e.angleZ*0.07,cz=Math.cos(az),sz=Math.sin(az);
-  const ab=e.body*0.028,cb=Math.cos(ab),sb=Math.sin(ab);
+  const az=e.angleZ*HEAD.roll,cz=Math.cos(az),sz=Math.sin(az);
+  const ab=e.body*HEAD.bodyRot,cb=Math.cos(ab),sb=Math.sin(ab);
   const bn=L.bn,eyeSide=L.side,EA=eyeSide==='L'?A.eyeL:(eyeSide==='R'?A.eyeR:null);
   const vOpen=eyeSide==='L'?e.eyeOpenL:e.eyeOpenR;
   const mo=e.mouthOpen,mHalfW=(A.mouth.x1-A.mouth.x0)/2;
@@ -1142,17 +1157,23 @@ function deform(L,e){
     }
     if(bn==='face'&&y>A.mouth.cy)y+=mo*6*FS*smooth((y-A.mouth.cy)/Math.max(1,A.face.y1-A.mouth.cy));
     // --- head transform ---
-    let hw=isHead?1:(L.group==='body'?0.16:0);   // body subtly follows head XYZ
+    let hw=isHead?1:0;
+    if(L.group==='body'){
+      // Collar stays with the head so a big nod does not open a gap at the neck.
+      const span=Math.max(1,BP.cy-NP.cy);
+      const t=clamp((y-(NP.cy-36))/span,0,1);
+      hw=SAVER?(1-smooth(t)*0.62):HEAD.body;
+    }
     if(bn==='neck')hw=0.55*smooth((A.neckBottom-y)/Math.max(1,A.neckBottom-A.neckTop));
     if(hw>0){
       const rx=x-NP.cx,ry=y-NP.cy,rx2=rx*cz-ry*sz,ry2=rx*sz+ry*cz;
       x+=(rx2-rx)*hw;y+=(ry2-ry)*hw;
       const dd=L.depth;
-      x+=hw*FS*(e.angleX*(14+40*(dd-1))+e.angleX*(NP.cy-y)*0.028);
-      y+=hw*FS*(-e.angleY*(9+30*(dd-1))-e.angleY*(dd-1)*(y-FC.y)*0.05);
+      x+=hw*FS*(e.angleX*(HEAD.yaw+HEAD.yawDepth*(dd-1))+e.angleX*(NP.cy-y)*0.028);
+      y+=hw*FS*(-e.angleY*(HEAD.pitch+HEAD.pitchDepth*(dd-1))-e.angleY*(dd-1)*(y-FC.y)*0.05);
     }
     // --- breathing ---
-    y-=(L.group==='body'?e.breath*2.0:e.breathHead*1.6)*FS;
+    y-=(L.group==='body'?e.breath*(SAVER?2.4:2.0):e.breathHead*(SAVER?2.4:1.6))*FS;
     if(bn==='topwear'&&y<CHEST.cy)y-=e.breath*2.2*FS*smooth((CHEST.cy-y)/(CHEST.ry*2));   // shoulders rise
     if(bn==='topwear')x=NP.cx+(x-NP.cx)*(1+e.breath*0.003);
     // --- bust jiggle ---
@@ -1183,13 +1204,13 @@ function deform(L,e){
   }
 }
 function updateSprings(e,t,dt,wind){
-  const headDX=(e.angleX*14+e.angleZ*0.07*(NP.cy-FC.y))*FS;
-  const bodyDX=e.body*0.028*(BP.cy-NP.cy)*0.35+e.angleX*14*0.16*FS;
+  const headDX=(e.angleX*HEAD.yaw+e.angleZ*HEAD.roll*(NP.cy-FC.y))*FS;
+  const bodyDX=e.body*HEAD.bodyRot*(BP.cy-NP.cy)*0.35+e.angleX*HEAD.yaw*HEAD.body*FS;
   for(const L of layers){
     if(!L.spr)continue;
     const base=L.group==='head'?headDX:bodyDX,windScale=L.phys==='sway'&&L.group!=='head'?2.5:1;
     for(const sp of L.spr){
-      const w=wind?(1.8*Math.sin(t*0.8+sp.phase)+1.0*Math.sin(t*1.9+sp.phase*2.3))*windScale:0;
+      const w=wind?((SAVER?2.3:1.8)*Math.sin(t*(SAVER?0.95:0.8)+sp.phase)+(SAVER?1.3:1.0)*Math.sin(t*(SAVER?2.0:1.9)+sp.phase*2.3))*windScale:0;
       const txv=base+w*FS;
       RT.spring(sp.stiff,txv,70,9,dt);sp.stiff.dx=-(sp.stiff.x-txv)*2.2;
       RT.spring(sp.soft,txv,16,1.3,dt);sp.soft.dx=-(sp.soft.x-txv)*3.0;
@@ -1211,7 +1232,8 @@ function animate(now,dt){
   const tgt=Object.assign({},T);
   const camLive=(auto.cam||OBS_MODE)&&cam.live&&performance.now()-lastTrackingAt<1200;
   if(camLive){
-    tgt.angleX=clamp(cam.ax,-1,1);tgt.angleY=clamp(cam.ay,-1,1);tgt.angleZ=clamp(cam.az,-1,1);
+    const hk=SAVER?1.2:1;
+    tgt.angleX=clamp(cam.ax*hk,-1,1);tgt.angleY=clamp(cam.ay*hk,-1,1);tgt.angleZ=clamp(cam.az*hk,-1,1);
     tgt.eyeOpenL=Math.min(tgt.eyeOpenL,cam.eL);tgt.eyeOpenR=Math.min(tgt.eyeOpenR,cam.eR);
     tgt.eyeX=clamp(cam.ex,-1,1);tgt.eyeY=clamp(cam.ey,-1,1);
     tgt.mouthOpen=Math.max(tgt.mouthOpen,cam.mo);
@@ -1220,15 +1242,38 @@ function animate(now,dt){
   }
   if(!camLive&&auto.mouse&&mouse.in){tgt.angleX=clamp(mouse.x*0.9,-1,1);tgt.angleY=clamp(-mouse.y*0.7,-1,1);tgt.eyeX=clamp(mouse.x*1.2,-1,1);tgt.eyeY=clamp(-mouse.y*0.8,-1,1);}
   if(auto.idle&&!camLive){
-    tgt.angleX+=0.13*Math.sin(t*0.42)+0.05*Math.sin(t*1.13);
-    tgt.angleY+=0.08*Math.sin(t*0.31+1.7);
-    tgt.angleZ+=0.07*Math.sin(t*0.23+0.5);
-    tgt.body+=0.10*Math.sin(t*0.19+2.1);
+    if(SAVER){
+      tgt.angleX+=0.28*Math.sin(t*0.62)+0.12*Math.sin(t*1.25);
+      tgt.angleY+=0.20*Math.sin(t*0.5+1.3)+0.08*Math.sin(t*1.1);
+      tgt.angleZ+=0.40*Math.sin(t*0.7+0.35)+0.14*Math.sin(t*1.35);
+      tgt.body+=0.22*Math.sin(t*0.46+2.0);
+    }else{
+      tgt.angleX+=0.13*Math.sin(t*0.42)+0.05*Math.sin(t*1.13);
+      tgt.angleY+=0.08*Math.sin(t*0.31+1.7);
+      tgt.angleZ+=0.07*Math.sin(t*0.23+0.5);
+      tgt.body+=0.10*Math.sin(t*0.19+2.1);
+    }
+  }else if(auto.idle&&camLive&&SAVER){
+    tgt.angleX+=0.06*Math.sin(t*0.62);
+    tgt.angleY+=0.04*Math.sin(t*0.5+1.3);
+    tgt.angleZ+=0.08*Math.sin(t*0.7+0.35);
+  }
+  if(SAVER&&typeof window.__duoAngle==='number'&&window.__duoAngle>=0){
+    if(duoAnglePrev!==null){
+      const dv=(window.__duoAngle-duoAnglePrev)/Math.max(dt,0.001);
+      duoFlick+=(clamp(dv*0.18,-0.6,0.6)-duoFlick)*Math.min(1,dt*5);
+    }
+    duoAnglePrev=window.__duoAngle;
+    const pose=window.__duoMotion||{};
+    tgt.angleX=clamp(tgt.angleX+(pose.yaw||0)+duoFlick*0.35,-1,1);
+    tgt.angleY=clamp(tgt.angleY+(pose.pitch||0),-1,1);
+    tgt.angleZ=clamp(tgt.angleZ+(pose.roll||0)+duoFlick,-1,1);
   }
   if(auto.rand&&!camLive){
-    if(now>nextRnd){nextRnd=now+1400+Math.random()*2600;
-      rnd.ax=(Math.random()*2-1)*0.55;rnd.ay=(Math.random()*2-1)*0.40;rnd.az=(Math.random()*2-1)*0.35;
-      rnd.bd=(Math.random()*2-1)*0.30;rnd.ex=(Math.random()*2-1)*0.60;rnd.ey=(Math.random()*2-1)*0.35;}
+    if(now>nextRnd){nextRnd=now+(SAVER?700:1400)+Math.random()*(SAVER?1300:2600);
+      const s=SAVER?1.15:1;
+      rnd.ax=(Math.random()*2-1)*0.55*s;rnd.ay=(Math.random()*2-1)*0.40*s;rnd.az=(Math.random()*2-1)*0.35*s;
+      rnd.bd=(Math.random()*2-1)*0.30*s;rnd.ex=(Math.random()*2-1)*0.60;rnd.ey=(Math.random()*2-1)*0.35;}
     tgt.angleX=clamp(tgt.angleX+rnd.ax,-1,1);tgt.angleY=clamp(tgt.angleY+rnd.ay,-1,1);
     tgt.angleZ=clamp(tgt.angleZ+rnd.az,-1,1);tgt.body=clamp(tgt.body+rnd.bd,-1,1);
     tgt.eyeX=clamp(tgt.eyeX+rnd.ex,-1,1);tgt.eyeY=clamp(tgt.eyeY+rnd.ey,-1,1);
@@ -1338,6 +1383,40 @@ Object.defineProperty(window,'Anime25D',{value:Object.freeze({version:APP_VERSIO
     cam:Object.assign({},cam),camLive:cam.live&&performance.now()-lastTrackingAt<1200,calibrated:!!prefs.calibration,
     view:Object.assign({},view),obs:sync.status,recording:!!(recorder&&recorder.active)};
 }})});
+
+// A Mac-prepared bundle is already rigged. The phone only draws it.
+async function loadPreparedRig(base){
+  base=String(base||'prepared').replace(/\/$/,'');
+  const response=await fetch(base+'/rig.json');
+  if(!response.ok)throw new Error('还没有准备好的立绘');
+  const rig=await response.json();
+  if(!rig||!rig.canvas||!Array.isArray(rig.layers))throw new Error('立绘数据不完整');
+  for(const layer of rig.layers){
+    if(!layer.png)throw new Error('立绘缺少图层图片');
+    const imageResponse=await fetch(base+'/'+layer.png);
+    if(!imageResponse.ok)throw new Error(layer.png+' 找不到');
+    const bitmap=await createImageBitmap(await imageResponse.blob());
+    const canvas=document.createElement('canvas');
+    canvas.width=bitmap.width;canvas.height=bitmap.height;
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    ctx.drawImage(bitmap,0,0);
+    layer.img=ctx.getImageData(0,0,canvas.width,canvas.height);
+    bitmap.close?.();
+    delete layer.png;
+  }
+  setAnchorMode(false);
+  applyRig(rig);
+  modelId=rig.id||'prepared';
+  modelName=rig.name||'立绘';
+  $('modelName').textContent=modelName;
+  $('modelName').title=modelName;
+  document.title='立绘屏保';
+  resetParams();restoreSettings(true);
+  history.reset(historySnapshot());savedSettings=comparableSettings();updateHistoryButtons();updateDirty();
+  dropStatus.textContent='';
+  status('立绘已就绪');
+}
+window.loadPreparedRig=loadPreparedRig;
 
 // ---------- start ----------
 if(OBS_MODE){

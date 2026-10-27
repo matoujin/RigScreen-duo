@@ -9,6 +9,48 @@
 @implementation SaverController {
   WKWebView *_web;
   UILabel *_error;
+  NSInteger _hingeStatus;
+  CGFloat _hingeAngle;
+  BOOL _hingeSeen;
+}
+
+- (void)pushDuo {
+  if (!_web) return;
+  NSString *status = @"none";
+  if (_hingeSeen) {
+    switch (_hingeStatus) {
+      case 1: status = @"closed"; break;
+      case 2: status = @"partial"; break;
+      case 3: status = @"open"; break;
+      default: status = @"unknown"; break;
+    }
+  }
+  UIWindowScene *scene = self.view.window.windowScene;
+  BOOL landscape = NO;
+  if (scene) {
+    if (@available(iOS 26.0, *)) {
+      landscape = UIInterfaceOrientationIsLandscape(scene.effectiveGeometry.interfaceOrientation);
+    } else {
+      landscape = UIInterfaceOrientationIsLandscape(scene.interfaceOrientation);
+    }
+  }
+  CGRect bounds = self.view.bounds;
+  NSDictionary *payload = @{
+    @"status": status,
+    @"angle": @(_hingeSeen ? _hingeAngle : -1),
+    @"width": @(bounds.size.width),
+    @"height": @(bounds.size.height),
+    @"landscape": @(landscape)
+  };
+  NSData *data = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
+  if (!data) return;
+  NSString *json = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+  [_web evaluateJavaScript:[NSString stringWithFormat:@"window.rigDuo&&window.rigDuo(%@)", json] completionHandler:nil];
+}
+
+- (void)viewDidLayoutSubviews {
+  [super viewDidLayoutSubviews];
+  [self pushDuo];
 }
 
 - (void)viewDidLoad {
@@ -41,6 +83,24 @@
   NSString *urlString = [NSString stringWithFormat:@"http://127.0.0.1:%d/?app=1", port];
   NSURL *url = [NSURL URLWithString:urlString];
   [_web loadRequest:[NSURLRequest requestWithURL:url]];
+
+  if (@available(iOS 27.1, *)) {
+    __weak SaverController *weakSelf = self;
+    UIHingeInteraction *hinge = [[UIHingeInteraction alloc] initWithUpdateHandler:^(UIHingeInteraction *interaction, UIHingeInteractionUpdate *update) {
+      SaverController *strongSelf = weakSelf;
+      if (!strongSelf) return;
+      UIHinge *state = update.hinge;
+      if (!state) {
+        strongSelf->_hingeSeen = NO;
+      } else {
+        strongSelf->_hingeSeen = YES;
+        strongSelf->_hingeStatus = state.status;
+        strongSelf->_hingeAngle = state.angle;
+      }
+      [strongSelf pushDuo];
+    }];
+    [self.view addInteraction:hinge];
+  }
 }
 
 - (void)showMessage:(NSString *)text {
@@ -75,6 +135,10 @@
   [self showMessage:error.localizedDescription];
 }
 
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
+  [self pushDuo];
+}
+
 - (void)webView:(WKWebView *)webView
     requestMediaCapturePermissionForOrigin:(WKSecurityOrigin *)origin
                           initiatedByFrame:(WKFrameInfo *)frame
@@ -85,23 +149,48 @@
 
 @end
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+static UIColor *SaverBackgroundColor(void) {
+  return [UIColor colorWithRed:0.078 green:0.082 blue:0.110 alpha:1];
+}
+
+@interface SceneDelegate : UIResponder <UIWindowSceneDelegate>
 @property(nonatomic, strong) UIWindow *window;
+@end
+
+@implementation SceneDelegate
+
+- (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions {
+  if (![scene isKindOfClass:[UIWindowScene class]]) return;
+  UIWindowScene *windowScene = (UIWindowScene *)scene;
+  self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
+  self.window.backgroundColor = SaverBackgroundColor();
+  self.window.rootViewController = [SaverController new];
+  [self.window makeKeyAndVisible];
+  UIApplication.sharedApplication.idleTimerDisabled = YES;
+}
+
+- (void)sceneDidBecomeActive:(UIScene *)scene {
+  UIApplication.sharedApplication.idleTimerDisabled = YES;
+}
+
+@end
+
+@interface AppDelegate : UIResponder <UIApplicationDelegate>
 @end
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   application.idleTimerDisabled = YES;
-  self.window = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
-  self.window.backgroundColor = [UIColor colorWithRed:0.078 green:0.082 blue:0.110 alpha:1];
-  self.window.rootViewController = [SaverController new];
-  [self.window makeKeyAndVisible];
   return YES;
 }
 
-- (void)applicationDidBecomeActive:(UIApplication *)application {
-  application.idleTimerDisabled = YES;
+- (UISceneConfiguration *)application:(UIApplication *)application
+configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
+                              options:(UISceneConnectionOptions *)options {
+  UISceneConfiguration *configuration = [[UISceneConfiguration alloc] initWithName:@"Default" sessionRole:connectingSceneSession.role];
+  configuration.delegateClass = [SceneDelegate class];
+  return configuration;
 }
 
 @end
