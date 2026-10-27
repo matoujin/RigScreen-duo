@@ -62,11 +62,77 @@
 
   const camToggle = document.getElementById("tgCam");
   const saverCam = document.getElementById("saverCam");
+  const camBg = document.createElement("canvas");
+  camBg.id = "camBg";
+  document.getElementById("stage").prepend(camBg);
+  const camBgCtx = camBg.getContext("2d", { alpha: false });
+  let camBgAt = 0;
+
+  const roomColor = (ctx, w, h) => {
+    const s = 8;
+    const spots = [[1, 1], [w - s - 1, 1], [1, h - s - 1], [w - s - 1, h - s - 1]];
+    let r = 0, g = 0, b = 0, n = 0;
+    for (const [x, y] of spots) {
+      const data = ctx.getImageData(Math.max(0, x), Math.max(0, y), s, s).data;
+      for (let i = 0; i < data.length; i += 4) {
+        r += data[i]; g += data[i + 1]; b += data[i + 2]; n++;
+      }
+    }
+    return `rgb(${(r / n) | 0},${(g / n) | 0},${(b / n) | 0})`;
+  };
+
+  // Blurred camera behind the illustration. The person is painted over with
+  // the room color so the background stays, and the blur hides the patch.
+  window.paintCamBg = (video, lm) => {
+    if (!video || video.readyState < 2) return;
+    const now = performance.now();
+    if (now - camBgAt < 80) return;
+    camBgAt = now;
+    const vw = video.videoWidth, vh = video.videoHeight;
+    if (!vw || !vh) return;
+    const long = 280;
+    const w = vw >= vh ? long : Math.max(2, Math.round(long * vw / vh));
+    const h = vw >= vh ? Math.max(2, Math.round(long * vh / vw)) : long;
+    if (camBg.width !== w) camBg.width = w;
+    if (camBg.height !== h) camBg.height = h;
+    const ctx = camBgCtx;
+    ctx.setTransform(w, 0, 0, h, 0, 0);
+    ctx.scale(-1, 1);
+    ctx.translate(-1, 0);
+    ctx.drawImage(video, 0, 0, 1, 1);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    if (lm && lm.length > 10) {
+      let minX = 1, maxX = 0, minY = 1, maxY = 0;
+      for (let i = 0; i < Math.min(lm.length, 468); i++) {
+        const p = lm[i];
+        const x = 1 - p.x;
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (p.y < minY) minY = p.y;
+        if (p.y > maxY) maxY = p.y;
+      }
+      const faceW = Math.max(0.08, maxX - minX) * w;
+      const faceH = Math.max(0.08, maxY - minY) * h;
+      const cx = ((minX + maxX) / 2) * w;
+      const cy = ((minY + maxY) / 2) * h;
+      const chin = maxY * h;
+      ctx.save();
+      ctx.filter = "blur(14px)";
+      ctx.fillStyle = roomColor(ctx, w, h);
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, faceW * 0.95, faceH * 1.15, 0, 0, Math.PI * 2);
+      ctx.ellipse(cx, chin + faceH * 1.15, faceW * 1.7, faceH * 2.4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  };
+
   const reflectCam = () => {
     const on = camToggle.classList.contains("on");
     saverCam.textContent = on ? "关闭相机" : "打开相机";
     saverCam.classList.toggle("on", on);
     document.body.classList.toggle("cam-on", on);
+    if (!on) camBgCtx.clearRect(0, 0, camBg.width, camBg.height);
   };
   new MutationObserver(reflectCam).observe(camToggle, { attributes: true, attributeFilter: ["class"] });
   reflectCam();

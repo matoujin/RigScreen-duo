@@ -999,6 +999,7 @@ const camera=window.RigDevices.createCamera({
     $('btnCalibrate').disabled=s!=='on';updateCamPreview();
   },
   onResults:(lm,video)=>{
+    if(SAVER&&typeof window.paintCamBg==='function')window.paintCamBg(video,lm);
     const aspect=video.videoWidth&&video.videoHeight?video.videoWidth/video.videoHeight:4/3;
     const out=lm?tracker.update(lm,performance.now()/1000,aspect):null;
     if(!out){cam.live=false;return;}

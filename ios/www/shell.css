@@ -57,6 +57,39 @@ body.screensaver #camPreview {
   display: none !important;
 }
 
+body.screensaver #viewport {
+  z-index: 2;
+}
+
+#camBg {
+  position: absolute;
+  z-index: 0;
+  left: -12%;
+  top: -12%;
+  width: 124%;
+  height: 124%;
+  pointer-events: none;
+  opacity: 0;
+  filter: blur(22px) saturate(1.12);
+}
+
+body.screensaver.cam-on #camBg {
+  opacity: 1;
+}
+
+body.screensaver.cam-on #stage {
+  background: #101014 !important;
+}
+
+body.screensaver.cam-on #stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 42%, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.32));
+}
+
 #saverDock {
   position: fixed;
   left: 0;
