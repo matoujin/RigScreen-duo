@@ -1,0 +1,94 @@
+/* Screensaver chrome layered on Anime2.5DRig. Active when body.screensaver is set. */
+body.screensaver header,
+body.screensaver #stageLabel,
+body.screensaver #stageTools,
+body.screensaver .sample-actions,
+body.screensaver #drop .drop-actions [data-sample],
+body.screensaver #drop #btnReadme2 {
+  display: none !important;
+}
+
+body.screensaver #main {
+  display: block !important;
+  position: fixed !important;
+  inset: 0 !important;
+}
+
+body.screensaver #stage {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  flex: none !important;
+}
+
+body.screensaver #panel {
+  display: none !important;
+}
+
+body.screensaver.show-panel #panel {
+  display: block !important;
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: calc(64px + env(safe-area-inset-bottom)) !important;
+  top: auto !important;
+  width: 100% !important;
+  max-height: 58% !important;
+  overflow: auto !important;
+  z-index: 25 !important;
+  border-left: 0 !important;
+  border-top: 1px solid #303039 !important;
+}
+
+body.screensaver #appStatus {
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  left: 16px;
+  right: 16px;
+  max-width: none;
+}
+
+body.screensaver #drop {
+  padding-bottom: calc(88px + env(safe-area-inset-bottom));
+}
+
+body.screensaver #camPreview {
+  top: calc(12px + env(safe-area-inset-top));
+  right: 12px;
+}
+
+#saverDock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  gap: 8px;
+  padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, rgba(16, 16, 20, 0.94), rgba(16, 16, 20, 0));
+}
+
+#saverDock button {
+  flex: 1;
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid #3a3440;
+  background: #1c1c22ee;
+  color: #f1eff3;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+#saverDock button.primary {
+  background: #c42c50;
+  border-color: #c42c50;
+  color: white;
+}
+
+#saverDock button.on {
+  background: #502134;
+  border-color: #c42c50;
+  color: #ffa1b7;
+}

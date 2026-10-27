@@ -18,6 +18,16 @@ import numpy as np
 import torch
 from PIL import Image
 
+
+def pick_inference_device():
+    """cuda on NVIDIA, mps on Apple Silicon, otherwise cpu."""
+    if torch.cuda.is_available():
+        return torch.device('cuda'), torch.bfloat16
+    mps = getattr(torch.backends, 'mps', None)
+    if mps is not None and mps.is_available():
+        return torch.device('mps'), torch.float16
+    return torch.device('cpu'), torch.float32
+
 VALID_BODY_PARTS_V2 = [
     'hair', 'headwear', 'face', 'eyes', 'eyewear', 'ears', 'earwear', 'nose', 'mouth', 
     'neck', 'neckwear', 'topwear', 'handwear', 'bottomwear', 'legwear', 'footwear', 
@@ -62,13 +72,16 @@ def apply_layerdiff(
                 layerdiff_pipeline.trans_vae.decoder.load_state_dict(td_sd)
                 print(f'load vae from {vae_ckpt}')
 
-        layerdiff_pipeline.vae.to(dtype=torch.bfloat16, device='cuda')
-        layerdiff_pipeline.trans_vae.to(dtype=torch.bfloat16, device='cuda')
-        layerdiff_pipeline.unet.to(dtype=torch.bfloat16, device='cuda')
-        layerdiff_pipeline.text_encoder.to(dtype=torch.bfloat16, device='cuda')
-        layerdiff_pipeline.text_encoder_2.to(dtype=torch.bfloat16, device='cuda')
-        if group_offload:
+        device, dtype = pick_inference_device()
+        layerdiff_pipeline.vae.to(dtype=dtype, device=device)
+        layerdiff_pipeline.trans_vae.to(dtype=dtype, device=device)
+        layerdiff_pipeline.unet.to(dtype=dtype, device=device)
+        layerdiff_pipeline.text_encoder.to(dtype=dtype, device=device)
+        layerdiff_pipeline.text_encoder_2.to(dtype=dtype, device=device)
+        if group_offload and device.type == 'cuda':
             layerdiff_pipeline.enable_group_offload('cuda', num_blocks_per_group=1)
+        elif group_offload:
+            print(f'group offload 只在 NVIDIA 上启用，这次整模放到 {device}')
 
     pipeline = layerdiff_pipeline
     if cache_tag_embeds:
@@ -82,7 +95,8 @@ def apply_layerdiff(
     scale = pad_size[0] / resolution
     Image.fromarray(fullpage).save(osp.join(saved, 'src_img.png'))
 
-    rng = torch.Generator(device=pipeline.unet.device).manual_seed(seed)
+    gen_device = pipeline.unet.device if pipeline.unet.device.type == 'cuda' else 'cpu'
+    rng = torch.Generator(device=gen_device).manual_seed(seed)
 
     tag_version = pipeline.unet.get_tag_version()
     if tag_version == 'v2':
@@ -192,10 +206,13 @@ def apply_marigold(srcp, pretrained: str, num_inference_steps=-1, seed=0, save_d
     if marigold_pipeline is None:
         unet = UNetFrameConditionModel.from_pretrained(pretrained, subfolder='unet')
         marigold_pipeline = MarigoldDepthPipeline.from_pretrained(pretrained, unet=unet)
-        marigold_pipeline.to(device='cuda', dtype=torch.bfloat16)
+        device, dtype = pick_inference_device()
+        marigold_pipeline.to(device=device, dtype=dtype)
 
-        if group_offload:
+        if group_offload and device.type == 'cuda':
             marigold_pipeline.enable_group_offload('cuda', num_blocks_per_group=1)
+        elif group_offload:
+            print(f'group offload 只在 NVIDIA 上启用，这次整模放到 {device}')
 
     pipe = marigold_pipeline
 

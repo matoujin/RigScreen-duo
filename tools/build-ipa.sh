@@ -4,9 +4,7 @@
 set -eu
 
 ROOT="$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)"
-RIG_COMMIT="7ddbd9943ea3152561b3dc8348fd752c850f3e95"
 SDK="${SDK:-$ROOT/.sdk/iPhoneOS16.5.sdk}"
-SRC="${SRC:-/tmp/Anime2.5DRig}"
 STAGE="$ROOT/build/stage"
 APP="$STAGE/Payload/RigScreen.app"
 WWW="$APP/www"
@@ -21,75 +19,10 @@ if [ ! -d "$SDK/System/Library/Frameworks/UIKit.framework" ]; then
   tar -C "$ROOT/.sdk" -xf "$archive"
 fi
 
-if [ ! -d "$SRC/.git" ]; then
-  mkdir -p "$SRC"
-  git -C "$SRC" init
-  git -C "$SRC" remote add origin https://github.com/852wa/Anime2.5DRig.git
-fi
-if ! git -C "$SRC" rev-parse HEAD 2>/dev/null | grep -q "$RIG_COMMIT"; then
-  git -C "$SRC" fetch --depth 1 origin "$RIG_COMMIT"
-  git -C "$SRC" checkout --detach FETCH_HEAD
-fi
-
 rm -rf "$STAGE"
-mkdir -p "$WWW/lib" "$WWW/licenses" "$ROOT/dist"
-
-cp "$SRC/index.html" "$WWW/index.html"
-cp -R "$SRC/lib/." "$WWW/lib/"
-cp "$SRC/eye_close.psd" "$SRC/mouth_close.psd" "$WWW/"
-cp "$SRC/LICENSE" "$WWW/licenses/Anime2.5DRig-MIT.txt"
-cp "$SRC/lib/vendor/face_mesh/NOTICE.md" "$WWW/licenses/MediaPipe-NOTICE.md"
-rm -rf "$WWW/lib/__pycache__"
-cp "$ROOT/overlay/shell.css" "$ROOT/overlay/shell.js" "$WWW/"
-
-python3 - "$WWW/index.html" << 'PY'
-import pathlib, sys
-path = pathlib.Path(sys.argv[1])
-text = path.read_text()
-old_view = '<meta name="viewport" content="width=device-width, initial-scale=1">'
-new_view = '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'
-if old_view not in text:
-    raise SystemExit("viewport tag missing")
-text = text.replace(old_view, new_view, 1)
-css = '<link rel="stylesheet" href="shell.css">'
-if css not in text:
-    text = text.replace("</head>", css + "\n</head>", 1)
-js = '<script src="shell.js"></script>'
-if js not in text:
-    text = text.replace("</body>", js + "\n</body>", 1)
-path.write_text(text)
-PY
-
-python3 - "$APP" << 'PY'
-import pathlib, struct, sys, zlib
-out_dir = pathlib.Path(sys.argv[1])
-
-def chunk(tag, data):
-    return struct.pack(">I", len(data)) + tag + data + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF)
-
-def png(size, filename):
-    rows = []
-    for y in range(size):
-        row = bytearray([0])
-        for x in range(size):
-            nx = (x + 0.5) / size * 2 - 1
-            ny = (y + 0.5) / size * 2 - 1
-            d = (nx * nx + ny * ny) ** 0.5
-            if d < 0.34:
-                row += bytes((196, 44, 80, 255))
-            elif d < 0.46:
-                row += bytes((80, 28, 40, 255))
-            else:
-                row += bytes((20, 21, 28, 255))
-        rows.append(bytes(row))
-    raw = b"".join(rows)
-    ihdr = struct.pack(">IIBBBBB", size, size, 8, 6, 0, 0, 0)
-    blob = b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", ihdr) + chunk(b"IDAT", zlib.compress(raw, 9)) + chunk(b"IEND", b"")
-    (out_dir / filename).write_bytes(blob)
-
-png(120, "AppIcon60x60@2x.png")
-png(180, "AppIcon60x60@3x.png")
-PY
+mkdir -p "$WWW" "$ROOT/dist"
+cp -R "$ROOT/ios/www/." "$WWW/"
+cp "$ROOT/ios/AppIcon60x60@2x.png" "$ROOT/ios/AppIcon60x60@3x.png" "$APP/"
 
 cp "$ROOT/ios/Info.plist" "$APP/Info.plist"
 printf 'APPL????' > "$APP/PkgInfo"
