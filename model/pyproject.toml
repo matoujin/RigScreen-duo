@@ -1,0 +1,42 @@
+[project]
+name = "rigscreen-model"
+version = "1.0.0"
+description = "see-through inference environment for RigScreen PSD export"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "torch==2.8.0+cu128",
+    "torchvision==0.23.0+cu128",
+    "torchaudio==2.8.0+cu128",
+    "live2d-common",
+    "live2d-annotators",
+    "diffusers==0.37.0",
+    "transformers==5.0.0",
+    "accelerate==1.13.0",
+    "safetensors==0.7.0",
+    "tokenizers==0.22.2",
+    "huggingface-hub==1.7.2",
+    "einops==0.8.2",
+    "psd-tools[composite]==1.14.2",
+    "scikit-learn==1.7.2",
+    "pycocotools==2.0.11",
+    "tqdm==4.67.3",
+    "timm @ git+https://github.com/huggingface/pytorch-image-models.git@6e3fdda39508db30766f9d9e6ec32380ebee8b8c",
+]
+
+[project.optional-dependencies]
+nf4 = ["bitsandbytes==0.49.2"]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+live2d-common = { path = "../vendor/see-through/common", editable = true }
+live2d-annotators = { path = "../vendor/see-through/annotators", editable = true }
+torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }
+torchaudio = { index = "pytorch-cu128" }
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true

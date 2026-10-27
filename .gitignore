@@ -1,3 +1,6 @@
 build/
 .sdk/
 agent-tools/
+model/.venv/
+workspace/
+*.webp
