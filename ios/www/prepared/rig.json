@@ -1,1 +1,506 @@
-{"name":"a.psd","id":"4c6db2-472e16f3-b4f79971","canvas":{"w":768,"h":768},"anchors":{"face":{"cx":381.43761024178303,"cy":243.11105409673237,"x0":268,"x1":494,"y0":100,"y1":412},"eyeL":{"x0":301,"x1":357,"y0":269,"y1":301,"icx":330.69048498389236,"icy":277.4780398796225,"closeY":288.84},"eyeR":{"x0":411,"x1":466,"y0":266,"y1":298,"icx":436.2160969074545,"icy":274.51967776802235,"closeY":285.84},"mouth":{"x0":367,"x1":403,"y0":365,"y1":375,"cx":383.62715922065485,"cy":368.60119332621264},"neckPivot":{"cx":386.49941437123215,"cy":438.05},"neckTop":325,"neckBottom":458,"bodyPivot":{"cx":386.49941437123215,"cy":768},"faceScale":0.6786786786786787,"hairRootY":160},"warnings":["不足する閉じ目を自動配置しました（「目」の差分バーで調整可）","mouth_close が無いため汎用閉じ口を自動配置しました（「口」のバーで調整可）"],"synth":{"eye":true,"mouth":true},"pre":{"noisy":7,"layers":15},"layers":[{"name":"legwear","source":"legwear","x":0,"y":26,"w":749,"h":716,"z":0,"depth":0.84,"group":"body","phys":null,"opacity":1,"fade":null,"side":null,"strands":null,"png":"layers/000.png"},{"name":"back hair","source":"back hair","x":25,"y":43,"w":742,"h":581,"z":1,"depth":0.55,"group":"head","phys":"hair","opacity":1,"fade":null,"side":null,"strands":[{"x":57,"tipY":532,"rootY":525},{"x":216,"tipY":604,"rootY":294},{"x":358,"tipY":556,"rootY":45},{"x":490,"tipY":585,"rootY":89},{"x":640,"tipY":611,"rootY":358},{"x":733,"tipY":480,"rootY":426}],"png":"layers/001.png"},{"name":"handwear","source":"handwear","x":169,"y":490,"w":448,"h":253,"z":2,"depth":0.86,"group":"body","phys":null,"opacity":1,"fade":null,"side":null,"strands":null,"png":"layers/002.png"},{"name":"neck","source":"neck","x":325,"y":323,"w":121,"h":138,"z":3,"depth":0.95,"group":"body","phys":null,"opacity":1,"fade":null,"side":null,"strands":null,"png":"layers/003.png"},{"name":"topwear","source":"topwear","x":226,"y":26,"w":542,"h":717,"z":4,"depth":0.9,"group":"body","phys":null,"opacity":1,"fade":null,"side":null,"strands":null,"png":"layers/004.png"},{"name":"ears","source":"ears","x":257,"y":255,"w":254,"h":77,"z":5,"depth":0.96,"group":"head","phys":null,"opacity":1,"fade":null,"side":null,"strands":null,"png":"layers/005.png"},{"name":"face","source":"face","x":266,"y":98,"w":231,"h":317,"z":6,"depth":1,"group":"head","phys":null,"opacity":1,"fade":null,"side":null,"strands":null,"png":"layers/006.png"},{"name":"nose","source":"nose","x":379,"y":316,"w":22,"h":35,"z":7,"depth":1.15,"group":"head","phys":null,"opacity":1,"fade":null,"side":null,"strands":null,"png":"layers/007.png"},{"name":"mouth_open","source":"mouth","x":365,"y":363,"w":41,"h":15,"z":8,"depth":1.08,"group":"head","phys":null,"opacity":1,"fade":"mouthOpen","side":null,"strands":null,"png":"layers/008.png"},{"name":"mouth_close","source":"","x":364,"y":363,"w":40,"h":10,"z":9,"depth":1.08,"group":"head","phys":null,"fade":"mouthClose","side":null,"strands":null,"synthetic":true,"png":"layers/009.png"},{"name":"headwear","source":"headwear","x":497,"y":153,"w":57,"h":245,"z":10,"depth":1.2,"group":"head","phys":null,"opacity":1,"fade":null,"side":null,"strands":null,"png":"layers/010.png"},{"name":"eyebrow_l","source":"eyebrow","x":289,"y":237,"w":73,"h":17,"z":11,"depth":1.14,"group":"head","phys":null,"opacity":1,"fade":null,"side":"L","strands":null,"png":"layers/011.png"},{"name":"eyebrow_r","source":"eyebrow","x":399,"y":236,"w":73,"h":12,"z":12,"depth":1.14,"group":"head","phys":null,"opacity":1,"fade":null,"side":"R","strands":null,"png":"layers/012.png"},{"name":"eyewhite_l","source":"eyewhite","x":299,"y":267,"w":61,"h":37,"z":13,"depth":1.06,"group":"head","phys":null,"opacity":1,"fade":"eyeOpen","side":"L","strands":null,"png":"layers/013.png"},{"name":"eyewhite_r","source":"eyewhite","x":409,"y":264,"w":60,"h":37,"z":14,"depth":1.06,"group":"head","phys":null,"opacity":1,"fade":"eyeOpen","side":"R","strands":null,"png":"layers/014.png"},{"name":"irides_l","source":"irides","x":310,"y":256,"w":43,"h":44,"z":15,"depth":1.08,"group":"head","phys":null,"opacity":1,"fade":"eyeOpen","side":"L","strands":null,"png":"layers/015.png"},{"name":"irides_r","source":"irides","x":415,"y":253,"w":43,"h":44,"z":16,"depth":1.08,"group":"head","phys":null,"opacity":1,"fade":"eyeOpen","side":"R","strands":null,"png":"layers/016.png"},{"name":"eyelash_l","source":"eyelash","x":288,"y":251,"w":75,"h":57,"z":17,"depth":1.12,"group":"head","phys":null,"opacity":1,"fade":"eyeOpen","side":"L","strands":null,"png":"layers/017.png"},{"name":"eyelash_r","source":"eyelash","x":398,"y":253,"w":78,"h":52,"z":18,"depth":1.12,"group":"head","phys":null,"opacity":1,"fade":"eyeOpen","side":"R","strands":null,"png":"layers/018.png"},{"name":"eye_close_l","source":"","x":298,"y":273,"w":62,"h":29,"z":19,"depth":1.12,"group":"head","phys":null,"fade":"eyeClose","side":"L","strands":null,"synthetic":true,"png":"layers/019.png"},{"name":"eye_close_r","source":"","x":408,"y":274,"w":61,"h":21,"z":20,"depth":1.12,"group":"head","phys":null,"fade":"eyeClose","side":"R","strands":null,"synthetic":true,"png":"layers/020.png"},{"name":"front hair","source":"front hair","x":213,"y":58,"w":291,"h":550,"z":21,"depth":1.28,"group":"head","phys":"hair","opacity":1,"fade":null,"side":null,"strands":[{"x":245,"tipY":602,"rootY":158},{"x":305,"tipY":581,"rootY":80},{"x":339,"tipY":234,"rootY":63},{"x":370,"tipY":278,"rootY":62},{"x":424,"tipY":269,"rootY":80},{"x":480,"tipY":286,"rootY":145}],"png":"layers/021.png"}]}
+{
+  "name": "a.psd",
+  "id": "4c6db2-472e16f3-b4f79971",
+  "canvas": {
+    "w": 768,
+    "h": 768
+  },
+  "anchors": {
+    "face": {
+      "cx": 381.43761024178303,
+      "cy": 243.11105409673237,
+      "x0": 268,
+      "x1": 494,
+      "y0": 100,
+      "y1": 412
+    },
+    "eyeL": {
+      "x0": 301,
+      "x1": 357,
+      "y0": 269,
+      "y1": 301,
+      "icx": 330.69048498389236,
+      "icy": 277.4780398796225,
+      "closeY": 288.84
+    },
+    "eyeR": {
+      "x0": 411,
+      "x1": 466,
+      "y0": 266,
+      "y1": 298,
+      "icx": 436.2160969074545,
+      "icy": 274.51967776802235,
+      "closeY": 285.84
+    },
+    "mouth": {
+      "x0": 367,
+      "x1": 403,
+      "y0": 365,
+      "y1": 375,
+      "cx": 383.62715922065485,
+      "cy": 368.60119332621264
+    },
+    "neckPivot": {
+      "cx": 386.49941437123215,
+      "cy": 348.94
+    },
+    "neckTop": 325,
+    "neckBottom": 458,
+    "bodyPivot": {
+      "cx": 386.49941437123215,
+      "cy": 768
+    },
+    "faceScale": 0.6786786786786787,
+    "hairRootY": 160
+  },
+  "warnings": [
+    "不足する閉じ目を自動配置しました（「目」の差分バーで調整可）",
+    "mouth_close が無いため汎用閉じ口を自動配置しました（「口」のバーで調整可）"
+  ],
+  "synth": {
+    "eye": true,
+    "mouth": true
+  },
+  "pre": {
+    "noisy": 7,
+    "layers": 15
+  },
+  "layers": [
+    {
+      "name": "legwear",
+      "source": "legwear",
+      "x": 0,
+      "y": 26,
+      "w": 749,
+      "h": 716,
+      "z": 0,
+      "depth": 0.84,
+      "group": "body",
+      "phys": null,
+      "opacity": 1,
+      "fade": null,
+      "side": null,
+      "strands": null,
+      "png": "layers/000.png"
+    },
+    {
+      "name": "back hair",
+      "source": "back hair",
+      "x": 25,
+      "y": 43,
+      "w": 742,
+      "h": 581,
+      "z": 1,
+      "depth": 0.55,
+      "group": "head",
+      "phys": "hair",
+      "opacity": 1,
+      "fade": null,
+      "side": null,
+      "strands": [
+        {
+          "x": 57,
+          "tipY": 532,
+          "rootY": 525
+        },
+        {
+          "x": 216,
+          "tipY": 604,
+          "rootY": 294
+        },
+        {
+          "x": 358,
+          "tipY": 556,
+          "rootY": 45
+        },
+        {
+          "x": 490,
+          "tipY": 585,
+          "rootY": 89
+        },
+        {
+          "x": 640,
+          "tipY": 611,
+          "rootY": 358
+        },
+        {
+          "x": 733,
+          "tipY": 480,
+          "rootY": 426
+        }
+      ],
+      "png": "layers/001.png"
+    },
+    {
+      "name": "handwear",
+      "source": "handwear",
+      "x": 169,
+      "y": 490,
+      "w": 448,
+      "h": 253,
+      "z": 2,
+      "depth": 0.86,
+      "group": "body",
+      "phys": null,
+      "opacity": 1,
+      "fade": null,
+      "side": null,
+      "strands": null,
+      "png": "layers/002.png"
+    },
+    {
+      "name": "neck",
+      "source": "neck",
+      "x": 325,
+      "y": 323,
+      "w": 121,
+      "h": 138,
+      "z": 3,
+      "depth": 0.95,
+      "group": "body",
+      "phys": null,
+      "opacity": 1,
+      "fade": null,
+      "side": null,
+      "strands": null,
+      "png": "layers/003.png"
+    },
+    {
+      "name": "topwear",
+      "source": "topwear",
+      "x": 226,
+      "y": 26,
+      "w": 542,
+      "h": 717,
+      "z": 4,
+      "depth": 0.9,
+      "group": "body",
+      "phys": null,
+      "opacity": 1,
+      "fade": null,
+      "side": null,
+      "strands": null,
+      "png": "layers/004.png"
+    },
+    {
+      "name": "ears",
+      "source": "ears",
+      "x": 257,
+      "y": 255,
+      "w": 254,
+      "h": 77,
+      "z": 5,
+      "depth": 0.96,
+      "group": "head",
+      "phys": null,
+      "opacity": 1,
+      "fade": null,
+      "side": null,
+      "strands": null,
+      "png": "layers/005.png"
+    },
+    {
+      "name": "face",
+      "source": "face",
+      "x": 266,
+      "y": 98,
+      "w": 231,
+      "h": 317,
+      "z": 6,
+      "depth": 1,
+      "group": "head",
+      "phys": null,
+      "opacity": 1,
+      "fade": null,
+      "side": null,
+      "strands": null,
+      "png": "layers/006.png"
+    },
+    {
+      "name": "nose",
+      "source": "nose",
+      "x": 379,
+      "y": 316,
+      "w": 22,
+      "h": 35,
+      "z": 7,
+      "depth": 1.15,
+      "group": "head",
+      "phys": null,
+      "opacity": 1,
+      "fade": null,
+      "side": null,
+      "strands": null,
+      "png": "layers/007.png"
+    },
+    {
+      "name": "mouth_open",
+      "source": "mouth",
+      "x": 365,
+      "y": 363,
+      "w": 41,
+      "h": 15,
+      "z": 8,
+      "depth": 1.08,
+      "group": "head",
+      "phys": null,
+      "opacity": 1,
+      "fade": "mouthOpen",
+      "side": null,
+      "strands": null,
+      "png": "layers/008.png"
+    },
+    {
+      "name": "mouth_close",
+      "source": "",
+      "x": 364,
+      "y": 363,
+      "w": 40,
+      "h": 10,
+      "z": 9,
+      "depth": 1.08,
+      "group": "head",
+      "phys": null,
+      "fade": "mouthClose",
+      "side": null,
+      "strands": null,
+      "synthetic": true,
+      "png": "layers/009.png"
+    },
+    {
+      "name": "headwear",
+      "source": "headwear",
+      "x": 497,
+      "y": 153,
+      "w": 57,
+      "h": 245,
+      "z": 10,
+      "depth": 1.2,
+      "group": "head",
+      "phys": null,
+      "opacity": 1,
+      "fade": null,
+      "side": null,
+      "strands": null,
+      "png": "layers/010.png"
+    },
+    {
+      "name": "eyebrow_l",
+      "source": "eyebrow",
+      "x": 289,
+      "y": 237,
+      "w": 73,
+      "h": 17,
+      "z": 11,
+      "depth": 1.14,
+      "group": "head",
+      "phys": null,
+      "opacity": 1,
+      "fade": null,
+      "side": "L",
+      "strands": null,
+      "png": "layers/011.png"
+    },
+    {
+      "name": "eyebrow_r",
+      "source": "eyebrow",
+      "x": 399,
+      "y": 236,
+      "w": 73,
+      "h": 12,
+      "z": 12,
+      "depth": 1.14,
+      "group": "head",
+      "phys": null,
+      "opacity": 1,
+      "fade": null,
+      "side": "R",
+      "strands": null,
+      "png": "layers/012.png"
+    },
+    {
+      "name": "eyewhite_l",
+      "source": "eyewhite",
+      "x": 299,
+      "y": 267,
+      "w": 61,
+      "h": 37,
+      "z": 13,
+      "depth": 1.06,
+      "group": "head",
+      "phys": null,
+      "opacity": 1,
+      "fade": "eyeOpen",
+      "side": "L",
+      "strands": null,
+      "png": "layers/013.png"
+    },
+    {
+      "name": "eyewhite_r",
+      "source": "eyewhite",
+      "x": 409,
+      "y": 264,
+      "w": 60,
+      "h": 37,
+      "z": 14,
+      "depth": 1.06,
+      "group": "head",
+      "phys": null,
+      "opacity": 1,
+      "fade": "eyeOpen",
+      "side": "R",
+      "strands": null,
+      "png": "layers/014.png"
+    },
+    {
+      "name": "irides_l",
+      "source": "irides",
+      "x": 310,
+      "y": 256,
+      "w": 43,
+      "h": 44,
+      "z": 15,
+      "depth": 1.08,
+      "group": "head",
+      "phys": null,
+      "opacity": 1,
+      "fade": "eyeOpen",
+      "side": "L",
+      "strands": null,
+      "png": "layers/015.png"
+    },
+    {
+      "name": "irides_r",
+      "source": "irides",
+      "x": 415,
+      "y": 253,
+      "w": 43,
+      "h": 44,
+      "z": 16,
+      "depth": 1.08,
+      "group": "head",
+      "phys": null,
+      "opacity": 1,
+      "fade": "eyeOpen",
+      "side": "R",
+      "strands": null,
+      "png": "layers/016.png"
+    },
+    {
+      "name": "eyelash_l",
+      "source": "eyelash",
+      "x": 288,
+      "y": 251,
+      "w": 75,
+      "h": 57,
+      "z": 17,
+      "depth": 1.12,
+      "group": "head",
+      "phys": null,
+      "opacity": 1,
+      "fade": "eyeOpen",
+      "side": "L",
+      "strands": null,
+      "png": "layers/017.png"
+    },
+    {
+      "name": "eyelash_r",
+      "source": "eyelash",
+      "x": 398,
+      "y": 253,
+      "w": 78,
+      "h": 52,
+      "z": 18,
+      "depth": 1.12,
+      "group": "head",
+      "phys": null,
+      "opacity": 1,
+      "fade": "eyeOpen",
+      "side": "R",
+      "strands": null,
+      "png": "layers/018.png"
+    },
+    {
+      "name": "eye_close_l",
+      "source": "",
+      "x": 298,
+      "y": 273,
+      "w": 62,
+      "h": 29,
+      "z": 19,
+      "depth": 1.12,
+      "group": "head",
+      "phys": null,
+      "fade": "eyeClose",
+      "side": "L",
+      "strands": null,
+      "synthetic": true,
+      "png": "layers/019.png"
+    },
+    {
+      "name": "eye_close_r",
+      "source": "",
+      "x": 408,
+      "y": 274,
+      "w": 61,
+      "h": 21,
+      "z": 20,
+      "depth": 1.12,
+      "group": "head",
+      "phys": null,
+      "fade": "eyeClose",
+      "side": "R",
+      "strands": null,
+      "synthetic": true,
+      "png": "layers/020.png"
+    },
+    {
+      "name": "front hair",
+      "source": "front hair",
+      "x": 213,
+      "y": 58,
+      "w": 291,
+      "h": 550,
+      "z": 21,
+      "depth": 1.28,
+      "group": "head",
+      "phys": "hair",
+      "opacity": 1,
+      "fade": null,
+      "side": null,
+      "strands": [
+        {
+          "x": 245,
+          "tipY": 602,
+          "rootY": 158
+        },
+        {
+          "x": 305,
+          "tipY": 581,
+          "rootY": 80
+        },
+        {
+          "x": 339,
+          "tipY": 234,
+          "rootY": 63
+        },
+        {
+          "x": 370,
+          "tipY": 278,
+          "rootY": 62
+        },
+        {
+          "x": 424,
+          "tipY": 269,
+          "rootY": 80
+        },
+        {
+          "x": 480,
+          "tipY": 286,
+          "rootY": 145
+        }
+      ],
+      "png": "layers/021.png"
+    }
+  ]
+}

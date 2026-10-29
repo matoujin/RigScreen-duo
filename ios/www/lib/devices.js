@@ -103,11 +103,19 @@ function createCamera(opts){
       state('loading');
       if(!root.FaceMesh)await loadFaceMesh();
       if(token!==gen)return false;
-      try{stream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480},facingMode:'user'}});}
+      const prefer=root.__preferCam||'';
+      const videoConstraints=prefer
+        ?{deviceId:{exact:prefer},width:{ideal:640},height:{ideal:480}}
+        :{width:{ideal:640},height:{ideal:480},facingMode:'user'};
+      try{stream=await navigator.mediaDevices.getUserMedia({video:videoConstraints});}
       catch(e1){
-        if(e1.name==='OverconstrainedError'||e1.name==='ConstraintNotSatisfiedError')stream=await navigator.mediaDevices.getUserMedia({video:true});
+        if(prefer){
+          try{stream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480},facingMode:'user'}});}
+          catch(e2){if(e2.name==='OverconstrainedError'||e2.name==='ConstraintNotSatisfiedError')stream=await navigator.mediaDevices.getUserMedia({video:true});else throw e2;}
+        }else if(e1.name==='OverconstrainedError'||e1.name==='ConstraintNotSatisfiedError')stream=await navigator.mediaDevices.getUserMedia({video:true});
         else throw e1;
       }
+      root.__preferCam='';
       if(token!==gen){stream.getTracks().forEach(t=>t.stop());return false;}
       const video=document.createElement('video');video.srcObject=stream;video.muted=true;video.playsInline=true;
       const s={video,stream,fm:null,pending:null,timer:null,lastTime:-1};session=s;

@@ -70,7 +70,7 @@ body.screensaver #viewport {
   height: 124%;
   pointer-events: none;
   opacity: 0;
-  filter: blur(22px) saturate(1.12);
+  filter: blur(16px) saturate(1.15);
 }
 
 body.screensaver.cam-on #camBg {

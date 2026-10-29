@@ -117,11 +117,13 @@
       const cy = ((minY + maxY) / 2) * h;
       const chin = maxY * h;
       ctx.save();
-      ctx.filter = "blur(14px)";
+      ctx.filter = "blur(6px)";
       ctx.fillStyle = roomColor(ctx, w, h);
       ctx.beginPath();
-      ctx.ellipse(cx, cy, faceW * 0.95, faceH * 1.15, 0, 0, Math.PI * 2);
-      ctx.ellipse(cx, chin + faceH * 1.15, faceW * 1.7, faceH * 2.4, 0, 0, Math.PI * 2);
+      // Head and a short shoulder patch only. A body-sized ellipse
+      // paints the whole frame one color, which reads as a backdrop layer.
+      ctx.ellipse(cx, cy, faceW * 0.7, faceH * 0.9, 0, 0, Math.PI * 2);
+      ctx.ellipse(cx, chin + faceH * 0.25, faceW * 0.8, faceH * 0.55, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
@@ -143,13 +145,35 @@
   };
   keepAwake();
 
+  let camRestartAt = 0;
   const restartCamIfNeeded = () => {
     if (!camToggle.classList.contains("on")) return;
+    const now = performance.now();
+    if (now - camRestartAt < 1200) return;
+    camRestartAt = now;
     camToggle.click();
     setTimeout(() => {
       if (!camToggle.classList.contains("on")) camToggle.click();
     }, 350);
   };
+  let knownCams = new Set();
+  const rememberCams = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+    const list = await navigator.mediaDevices.enumerateDevices();
+    knownCams = new Set(list.filter((d) => d.kind === "videoinput").map((d) => d.deviceId));
+  };
+  rememberCams();
+  if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
+    navigator.mediaDevices.addEventListener("devicechange", async () => {
+      const list = await navigator.mediaDevices.enumerateDevices();
+      const vids = list.filter((d) => d.kind === "videoinput");
+      const fresh = vids.filter((d) => d.deviceId && !knownCams.has(d.deviceId));
+      knownCams = new Set(vids.map((d) => d.deviceId));
+      if (!fresh.length || !camToggle.classList.contains("on")) return;
+      window.__preferCam = fresh[fresh.length - 1].deviceId;
+      restartCamIfNeeded();
+    });
+  }
   window.addEventListener("pageshow", () => {
     keepAwake();
     restartCamIfNeeded();
@@ -222,6 +246,24 @@
       };
     }
     if (typeof window.rigRefit === "function") window.rigRefit();
+    scheduleCamForFold(kind);
+  };
+
+  let openedCamKind = "";
+  let camFoldTimer = 0;
+  const scheduleCamForFold = (kind) => {
+    if (kind !== "cover" && kind !== "inner") return;
+    clearTimeout(camFoldTimer);
+    camFoldTimer = setTimeout(() => {
+      if (!camToggle.classList.contains("on")) {
+        openedCamKind = kind;
+        return;
+      }
+      if (openedCamKind === kind) return;
+      openedCamKind = kind;
+      window.__preferCam = "";
+      restartCamIfNeeded();
+    }, 480);
   };
 
   window.rigDuo = (info) => {
